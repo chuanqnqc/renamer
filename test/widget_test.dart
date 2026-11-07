@@ -16,6 +16,11 @@ void main() {
     expect(find.text('Rules'), findsOneWidget);
     expect(find.text('Preview'), findsOneWidget);
     expect(find.text('Open'), findsOneWidget);
+    expect(find.text('Open folder'), findsWidgets);
     expect(find.text('Clear'), findsOneWidget);
+    expect(find.text('Presets'), findsOneWidget);
+    expect(find.text('Undo'), findsOneWidget);
+    expect(find.text('drag or select your files here'), findsOneWidget);
+    expect(find.byIcon(Icons.upload_file), findsOneWidget);
   });
 }

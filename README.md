@@ -16,6 +16,6 @@ flutter run -d windows
 - [x] Iteration 1 — file intake + identity preview
 - [x] Iteration 2 — rule engine
 - [x] Iteration 3 — validation + apply
-- [ ] Iteration 4 — rule list UX
-- [ ] Iteration 5 — presets
-- [ ] Iteration 6 — undo
+- [x] Iteration 4 — rule list UX
+- [x] Iteration 5 — presets
+- [x] Iteration 6 — undo

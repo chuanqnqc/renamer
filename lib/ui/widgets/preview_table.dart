@@ -70,9 +70,13 @@ class PreviewTable extends StatelessWidget {
                                   ),
                                 ),
                               Expanded(
-                                child: Text(
-                                  row.file.originalName,
-                                  overflow: TextOverflow.ellipsis,
+                                child: Tooltip(
+                                  message: row.file.originalName,
+                                  waitDuration: const Duration(milliseconds: 300),
+                                  child: Text(
+                                    row.file.originalName,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ),
                               Icon(
@@ -82,14 +86,20 @@ class PreviewTable extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               Expanded(
-                                child: Text(
-                                  row.newName,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontWeight: changed
-                                        ? FontWeight.w600
-                                        : FontWeight.w400,
-                                    color: error ? scheme.error : null,
+                                child: Tooltip(
+                                  message: row.hasError
+                                      ? '${row.newName}\n${row.error}'
+                                      : row.newName,
+                                  waitDuration: const Duration(milliseconds: 300),
+                                  child: Text(
+                                    row.newName,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontWeight: changed
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
+                                      color: error ? scheme.error : null,
+                                    ),
                                   ),
                                 ),
                               ),

@@ -79,6 +79,99 @@ void main() {
     expect(out, '20261106_Report.pdf');
   });
 
+  test('insert at position from start and end', () {
+    final fromStart = engine.apply(
+      originalName: 'abcdef.txt',
+      rules: [
+        InsertAtPositionRule(
+          id: '1',
+          text: 'XX',
+          position: 2,
+          from: CharRemoveFrom.start,
+        ),
+      ],
+      index: 0,
+      total: 1,
+    );
+    expect(fromStart, 'abXXcdef.txt');
+
+    final fromEnd = engine.apply(
+      originalName: 'abcdef.txt',
+      rules: [
+        InsertAtPositionRule(
+          id: '1',
+          text: '_',
+          position: 1,
+          from: CharRemoveFrom.end,
+        ),
+      ],
+      index: 0,
+      total: 1,
+    );
+    expect(fromEnd, 'abcde_f.txt');
+  });
+
+  test('clear name keeps extension only', () {
+    final out = engine.apply(
+      originalName: 'Vacation Photo.JPG',
+      rules: [ClearNameRule(id: '1')],
+      index: 0,
+      total: 1,
+    );
+    expect(out, '.JPG');
+
+    final rebuilt = engine.apply(
+      originalName: 'Vacation Photo.JPG',
+      rules: [
+        ClearNameRule(id: '1'),
+        NumberingRule(
+          id: '2',
+          start: 1,
+          pad: 2,
+          position: InsertPosition.start,
+          separator: '',
+        ),
+      ],
+      index: 0,
+      total: 1,
+    );
+    expect(rebuilt, '01.JPG');
+  });
+
+  test('after clear name, end inserts stay before the extension', () {
+    final numbered = engine.apply(
+      originalName: 'photo.jpg',
+      rules: [
+        ClearNameRule(id: '1'),
+        NumberingRule(
+          id: '2',
+          start: 1,
+          position: InsertPosition.end,
+          separator: '_',
+        ),
+      ],
+      index: 0,
+      total: 1,
+    );
+    expect(numbered, '_1.jpg');
+
+    final inserted = engine.apply(
+      originalName: 'photo.jpg',
+      rules: [
+        ClearNameRule(id: '1'),
+        InsertAtPositionRule(
+          id: '2',
+          text: 'aaa',
+          position: 0,
+          from: CharRemoveFrom.end,
+        ),
+      ],
+      index: 0,
+      total: 1,
+    );
+    expect(inserted, 'aaa.jpg');
+  });
+
   test('find replace can be case-insensitive', () {
     final out = engine.apply(
       originalName: 'MyPhoto.JPG',

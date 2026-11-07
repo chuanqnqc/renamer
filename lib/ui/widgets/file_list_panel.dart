@@ -5,9 +5,14 @@ import '../../state/rename_session.dart';
 import 'panel_chrome.dart';
 
 class FileListPanel extends StatelessWidget {
-  const FileListPanel({super.key, required this.onAddFiles});
+  const FileListPanel({
+    super.key,
+    required this.onAddFiles,
+    required this.onAddFolder,
+  });
 
   final VoidCallback onAddFiles;
+  final VoidCallback onAddFolder;
 
   @override
   Widget build(BuildContext context) {
@@ -16,15 +21,26 @@ class FileListPanel extends StatelessWidget {
     return PanelChrome(
       title: 'Files',
       subtitle: session.isEmpty
-          ? 'Drop or open files to begin'
+          ? 'Drop or select files to begin'
           : '${session.fileCount} selected',
-      trailing: IconButton(
-        tooltip: 'Add files',
-        onPressed: onAddFiles,
+      trailing: PopupMenuButton<String>(
+        tooltip: 'Add',
         icon: const Icon(Icons.add),
+        onSelected: (value) {
+          switch (value) {
+            case 'files':
+              onAddFiles();
+            case 'folder':
+              onAddFolder();
+          }
+        },
+        itemBuilder: (context) => const [
+          PopupMenuItem(value: 'files', child: Text('Add files')),
+          PopupMenuItem(value: 'folder', child: Text('Add folder')),
+        ],
       ),
       child: session.isEmpty
-          ? _EmptyHint(onAddFiles: onAddFiles)
+          ? _EmptyHint(onAddFiles: onAddFiles, onAddFolder: onAddFolder)
           : ListView.separated(
               itemCount: session.files.length,
               separatorBuilder: (_, _) => const Divider(height: 1),
@@ -55,12 +71,18 @@ class FileListPanel extends StatelessWidget {
 }
 
 class _EmptyHint extends StatelessWidget {
-  const _EmptyHint({required this.onAddFiles});
+  const _EmptyHint({
+    required this.onAddFiles,
+    required this.onAddFolder,
+  });
 
   final VoidCallback onAddFiles;
+  final VoidCallback onAddFolder;
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -68,22 +90,35 @@ class _EmptyHint extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.file_open_outlined,
-              size: 40,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Drag files here or choose Open',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              Icons.upload_file,
+              size: 56,
+              color: scheme.primary.withValues(alpha: 0.85),
             ),
             const SizedBox(height: 16),
-            OutlinedButton(
-              onPressed: onAddFiles,
-              child: const Text('Browse files'),
+            Text(
+              'drag or select your files here',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 20),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: onAddFiles,
+                  icon: const Icon(Icons.insert_drive_file_outlined, size: 18),
+                  label: const Text('Select files'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: onAddFolder,
+                  icon: const Icon(Icons.folder_open, size: 18),
+                  label: const Text('Open folder'),
+                ),
+              ],
             ),
           ],
         ),

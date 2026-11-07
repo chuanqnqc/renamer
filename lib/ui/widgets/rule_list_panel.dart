@@ -6,8 +6,15 @@ import '../../state/rename_session.dart';
 import 'panel_chrome.dart';
 import 'rule_card.dart';
 
-class RuleListPanel extends StatelessWidget {
+class RuleListPanel extends StatefulWidget {
   const RuleListPanel({super.key});
+
+  @override
+  State<RuleListPanel> createState() => _RuleListPanelState();
+}
+
+class _RuleListPanelState extends State<RuleListPanel> {
+  String? _expandedId;
 
   @override
   Widget build(BuildContext context) {
@@ -17,20 +24,27 @@ class RuleListPanel extends StatelessWidget {
     return PanelChrome(
       title: 'Rules',
       subtitle: rules.isEmpty
-          ? 'Applied in order'
+          ? 'Drag to reorder · applied top to bottom'
           : '${rules.where((r) => r.enabled).length} of ${rules.length} enabled',
       trailing: PopupMenuButton<String>(
         tooltip: 'Add rule',
         icon: const Icon(Icons.add),
         onSelected: (value) {
           final rule = _createRule(value);
-          if (rule != null) session.addRule(rule);
+          if (rule == null) return;
+          session.addRule(rule);
+          setState(() => _expandedId = rule.id);
         },
         itemBuilder: (context) => const [
           PopupMenuItem(value: 'prefix', child: Text('Prefix')),
           PopupMenuItem(value: 'suffix', child: Text('Suffix')),
           PopupMenuItem(value: 'findReplace', child: Text('Find & replace')),
           PopupMenuItem(value: 'removeChars', child: Text('Remove characters')),
+          PopupMenuItem(
+            value: 'insertAtPosition',
+            child: Text('Insert at position'),
+          ),
+          PopupMenuItem(value: 'clearName', child: Text('Clear name')),
           PopupMenuItem(value: 'nameCase', child: Text('Name case')),
           PopupMenuDivider(),
           PopupMenuItem(value: 'numbering', child: Text('Numbering')),
@@ -44,7 +58,7 @@ class RuleListPanel extends StatelessWidget {
                 padding: const EdgeInsets.all(24),
                 child: Text(
                   'Add rules to transform filenames.\n'
-                  'They run top to bottom.',
+                  'They run top to bottom — drag to reorder.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -52,12 +66,22 @@ class RuleListPanel extends StatelessWidget {
                 ),
               ),
             )
-          : ListView.builder(
+          : ReorderableListView.builder(
+              buildDefaultDragHandles: false,
               itemCount: rules.length,
-              itemBuilder: (context, index) => RuleCard(
-                index: index,
-                rule: rules[index],
-              ),
+              onReorderItem: session.reorderRules,
+              itemBuilder: (context, index) {
+                final rule = rules[index];
+                return RuleCard(
+                  key: ValueKey(rule.id),
+                  index: index,
+                  rule: rule,
+                  expanded: _expandedId == rule.id,
+                  onExpandedChanged: (open) {
+                    setState(() => _expandedId = open ? rule.id : null);
+                  },
+                );
+              },
             ),
     );
   }
@@ -68,6 +92,8 @@ class RuleListPanel extends StatelessWidget {
       'suffix' => RenameRuleFactory.suffix(),
       'findReplace' => RenameRuleFactory.findReplace(),
       'removeChars' => RenameRuleFactory.removeChars(),
+      'insertAtPosition' => RenameRuleFactory.insertAtPosition(),
+      'clearName' => RenameRuleFactory.clearName(),
       'nameCase' => RenameRuleFactory.nameCase(),
       'numbering' => RenameRuleFactory.numbering(),
       'insertDate' => RenameRuleFactory.insertDate(),

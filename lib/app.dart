@@ -10,7 +10,12 @@ class FileRenamerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => RenameSession(),
+      create: (_) {
+        final session = RenameSession();
+        // Fire-and-forget; UI works before stores finish loading.
+        session.initialize();
+        return session;
+      },
       child: MaterialApp(
         title: 'FileRenamer',
         debugShowCheckedModeBanner: false,

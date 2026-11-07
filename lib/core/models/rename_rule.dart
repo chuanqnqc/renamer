@@ -170,6 +170,55 @@ class RemoveCharsRule extends RenameRule {
       );
 }
 
+/// Inserts text into the filename stem at a character index.
+class InsertAtPositionRule extends RenameRule {
+  InsertAtPositionRule({
+    required super.id,
+    super.enabled,
+    this.text = '',
+    this.position = 0,
+    this.from = CharRemoveFrom.start,
+  });
+
+  String text;
+  int position;
+  CharRemoveFrom from;
+
+  @override
+  String get typeLabel => 'Insert at position';
+
+  @override
+  String get summary {
+    if (text.isEmpty) return 'Insert text at position';
+    final side = from == CharRemoveFrom.start ? 'start' : 'end';
+    return 'Insert "$text" at $position from $side';
+  }
+
+  @override
+  String apply(String name, RenameContext ctx) {
+    if (text.isEmpty) return name;
+    final parts = FilenameParts.parse(name);
+    final stem = parts.stem;
+    final raw = position < 0 ? 0 : position;
+    final index = switch (from) {
+      CharRemoveFrom.start => raw.clamp(0, stem.length),
+      CharRemoveFrom.end => (stem.length - raw).clamp(0, stem.length),
+    };
+    final next =
+        '${stem.substring(0, index)}$text${stem.substring(index)}';
+    return parts.copyWith(stem: next).fullName;
+  }
+
+  @override
+  InsertAtPositionRule copy() => InsertAtPositionRule(
+        id: id,
+        enabled: enabled,
+        text: text,
+        position: position,
+        from: from,
+      );
+}
+
 class NameCaseRule extends RenameRule {
   NameCaseRule({
     required super.id,
@@ -365,6 +414,29 @@ class ExtensionCaseRule extends RenameRule {
       ExtensionCaseRule(id: id, enabled: enabled, mode: mode);
 }
 
+/// Clears the filename stem; keeps the extension.
+class ClearNameRule extends RenameRule {
+  ClearNameRule({
+    required super.id,
+    super.enabled,
+  });
+
+  @override
+  String get typeLabel => 'Clear name';
+
+  @override
+  String get summary => 'Clear filename content (keep extension)';
+
+  @override
+  String apply(String name, RenameContext ctx) {
+    final parts = FilenameParts.parse(name);
+    return parts.copyWith(stem: '').fullName;
+  }
+
+  @override
+  ClearNameRule copy() => ClearNameRule(id: id, enabled: enabled);
+}
+
 /// Factory helpers for the Add Rule menu.
 abstract final class RenameRuleFactory {
   static int _seq = 0;
@@ -383,4 +455,7 @@ abstract final class RenameRuleFactory {
   static InsertDateRule insertDate() => InsertDateRule(id: newId());
   static ExtensionCaseRule extensionCase() =>
       ExtensionCaseRule(id: newId());
+  static ClearNameRule clearName() => ClearNameRule(id: newId());
+  static InsertAtPositionRule insertAtPosition() =>
+      InsertAtPositionRule(id: newId());
 }

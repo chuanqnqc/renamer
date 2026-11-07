@@ -10,58 +10,96 @@ class RuleCard extends StatelessWidget {
     super.key,
     required this.index,
     required this.rule,
+    required this.expanded,
+    required this.onExpandedChanged,
   });
 
   final int index;
   final RenameRule rule;
+  final bool expanded;
+  final ValueChanged<bool> onExpandedChanged;
 
   @override
   Widget build(BuildContext context) {
     final session = context.read<RenameSession>();
     final scheme = Theme.of(context).colorScheme;
+    final muted = !rule.enabled;
 
     return Card(
-      margin: const EdgeInsets.fromLTRB(8, 6, 8, 2),
+      margin: const EdgeInsets.fromLTRB(8, 4, 8, 4),
       elevation: 0,
-      color: rule.enabled
-          ? scheme.surfaceContainerHigh
-          : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 4, 4, 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Checkbox(
-                  value: rule.enabled,
-                  onChanged: (v) =>
-                      session.setRuleEnabled(index, v ?? false),
-                ),
-                Expanded(
-                  child: Text(
-                    rule.typeLabel,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: rule.enabled
-                              ? null
-                              : scheme.onSurface.withValues(alpha: 0.5),
-                        ),
+      color: muted
+          ? scheme.surfaceContainerHighest.withValues(alpha: 0.45)
+          : scheme.surfaceContainerHigh,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InkWell(
+            onTap: () => onExpandedChanged(!expanded),
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
+              child: Row(
+                children: [
+                  ReorderableDragStartListener(
+                    index: index,
+                    child: const Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Icon(Icons.drag_handle, size: 20),
+                    ),
                   ),
-                ),
-                IconButton(
-                  tooltip: 'Remove rule',
-                  icon: const Icon(Icons.delete_outline, size: 18),
-                  onPressed: () => session.removeRuleAt(index),
-                ),
-              ],
+                  Checkbox(
+                    value: rule.enabled,
+                    onChanged: (v) =>
+                        session.setRuleEnabled(index, v ?? false),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          rule.typeLabel,
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: muted
+                                        ? scheme.onSurface.withValues(alpha: 0.5)
+                                        : null,
+                                  ),
+                        ),
+                        Text(
+                          rule.summary,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    expanded ? Icons.expand_less : Icons.expand_more,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                  IconButton(
+                    tooltip: 'Remove rule',
+                    icon: const Icon(Icons.delete_outline, size: 18),
+                    onPressed: () => session.removeRuleAt(index),
+                  ),
+                ],
+              ),
             ),
+          ),
+          if (expanded) ...[
+            const Divider(height: 1),
             Padding(
-              padding: const EdgeInsets.only(left: 12, right: 8),
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
               child: _RuleEditor(rule: rule),
             ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -164,6 +202,61 @@ class _RuleEditor extends StatelessWidget {
                   touch();
                 },
               ),
+            ),
+          ],
+        ),
+      final InsertAtPositionRule r => Column(
+          children: [
+            _TextField(
+              label: 'Text',
+              value: r.text,
+              onChanged: (v) {
+                r.text = v;
+                touch();
+              },
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: _IntField(
+                    label: 'Position',
+                    value: r.position,
+                    min: 0,
+                    onChanged: (v) {
+                      r.position = v;
+                      touch();
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DropdownButtonFormField<CharRemoveFrom>(
+                    // ignore: deprecated_member_use
+                    value: r.from,
+                    decoration: const InputDecoration(
+                      labelText: 'Position from',
+                      isDense: true,
+                      border: OutlineInputBorder(),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: CharRemoveFrom.start,
+                        child: Text('Start'),
+                      ),
+                      DropdownMenuItem(
+                        value: CharRemoveFrom.end,
+                        child: Text('End'),
+                      ),
+                    ],
+                    onChanged: (v) {
+                      if (v == null) return;
+                      r.from = v;
+                      touch();
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -345,6 +438,12 @@ class _RuleEditor extends StatelessWidget {
             r.mode = v;
             touch();
           },
+        ),
+      ClearNameRule() => Text(
+          'Removes all characters from the name, keeping the extension.',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
         ),
     };
   }
