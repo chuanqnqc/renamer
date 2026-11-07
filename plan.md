@@ -6,9 +6,9 @@ Blank Flutter desktop project at `e:\projects\Renamer\renamer` (counter demo onl
 
 ## Todos
 
-- [ ] Iteration 1: rename to filerenamer, file pick/drop, identity preview shell
-- [ ] Iteration 2: RuleEngine + prefix/suffix/replace/remove/case + live preview
-- [ ] Iteration 3: numbering/date/ext-case, validation, two-phase apply
+- [x] Iteration 1: rename to filerenamer, file pick/drop, identity preview shell
+- [x] Iteration 2: RuleEngine + prefix/suffix/replace/remove/case + live preview
+- [x] Iteration 3: numbering/date/ext-case, validation, two-phase apply
 - [ ] Iteration 4: drag-reorder, disable, delete rules
 - [ ] Iteration 5: save/load/import/export presets
 - [ ] Iteration 6: persist last mapping + undo restore

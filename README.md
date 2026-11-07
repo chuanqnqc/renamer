@@ -1,17 +1,21 @@
-# renamer
+# FileRenamer
 
-A new Flutter project.
+Desktop batch file renamer with live preview, ordered rename rules, presets, and undo.
 
-## Getting Started
+Built with Flutter (Windows / macOS / Linux). See [plan.md](plan.md) for the iterative roadmap.
 
-This project is a starting point for a Flutter application.
+## Run
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+flutter pub get
+flutter run -d windows
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Iteration status
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- [x] Iteration 1 — file intake + identity preview
+- [x] Iteration 2 — rule engine
+- [x] Iteration 3 — validation + apply
+- [ ] Iteration 4 — rule list UX
+- [ ] Iteration 5 — presets
+- [ ] Iteration 6 — undo
