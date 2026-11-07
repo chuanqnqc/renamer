@@ -80,6 +80,11 @@ class _RuleListPanelState extends State<RuleListPanel> {
                   onExpandedChanged: (open) {
                     setState(() => _expandedId = open ? rule.id : null);
                   },
+                  onCollapse: () {
+                    // Minimize immediately on "=" press (any expanded rule).
+                    if (_expandedId == null) return;
+                    setState(() => _expandedId = null);
+                  },
                 );
               },
             ),
