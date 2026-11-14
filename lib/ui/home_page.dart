@@ -185,13 +185,11 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             _Toolbar(
-              canClear: !session.isEmpty,
               canApply: session.canApply,
               canUndo: session.canUndo,
               isApplying: session.isApplying,
               onOpen: _openFiles,
               onOpenFolder: _openFolder,
-              onClear: session.clearFiles,
               onPresets: () => showPresetsDialog(context),
               onUndo: _undo,
               onApply: _confirmAndApply,
@@ -280,25 +278,21 @@ class _HomePageState extends State<HomePage> {
 
 class _Toolbar extends StatelessWidget {
   const _Toolbar({
-    required this.canClear,
     required this.canApply,
     required this.canUndo,
     required this.isApplying,
     required this.onOpen,
     required this.onOpenFolder,
-    required this.onClear,
     required this.onPresets,
     required this.onUndo,
     required this.onApply,
   });
 
-  final bool canClear;
   final bool canApply;
   final bool canUndo;
   final bool isApplying;
   final VoidCallback onOpen;
   final VoidCallback onOpenFolder;
-  final VoidCallback onClear;
   final VoidCallback onPresets;
   final VoidCallback onUndo;
   final VoidCallback onApply;
@@ -338,12 +332,6 @@ class _Toolbar extends StatelessWidget {
                       onPressed: isApplying ? null : onOpenFolder,
                       icon: const Icon(Icons.folder_open, size: 18),
                       label: const Text('Open folder'),
-                    ),
-                    const SizedBox(width: 8),
-                    OutlinedButton.icon(
-                      onPressed: canClear && !isApplying ? onClear : null,
-                      icon: const Icon(Icons.clear_all, size: 18),
-                      label: const Text('Clear'),
                     ),
                     const SizedBox(width: 8),
                     OutlinedButton.icon(

@@ -130,6 +130,13 @@ class RenameSession extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearRules() {
+    if (_rules.isEmpty) return;
+    _rules.clear();
+    _statusMessage = null;
+    notifyListeners();
+  }
+
   void addRule(RenameRule rule) {
     _rules.add(rule);
     _statusMessage = null;

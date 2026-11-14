@@ -26,30 +26,51 @@ class _RuleListPanelState extends State<RuleListPanel> {
       subtitle: rules.isEmpty
           ? 'Drag to reorder · applied top to bottom'
           : '${rules.where((r) => r.enabled).length} of ${rules.length} enabled',
-      trailing: PopupMenuButton<String>(
-        tooltip: 'Add rule',
-        icon: const Icon(Icons.add),
-        onSelected: (value) {
-          final rule = _createRule(value);
-          if (rule == null) return;
-          session.addRule(rule);
-          setState(() => _expandedId = rule.id);
-        },
-        itemBuilder: (context) => const [
-          PopupMenuItem(value: 'prefix', child: Text('Prefix')),
-          PopupMenuItem(value: 'suffix', child: Text('Suffix')),
-          PopupMenuItem(value: 'findReplace', child: Text('Find & replace')),
-          PopupMenuItem(value: 'removeChars', child: Text('Remove characters')),
-          PopupMenuItem(
-            value: 'insertAtPosition',
-            child: Text('Insert at position'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            tooltip: 'Clear rules',
+            onPressed: rules.isEmpty
+                ? null
+                : () {
+                    session.clearRules();
+                    setState(() => _expandedId = null);
+                  },
+            icon: const Icon(Icons.clear_all),
           ),
-          PopupMenuItem(value: 'clearName', child: Text('Clear name')),
-          PopupMenuItem(value: 'nameCase', child: Text('Name case')),
-          PopupMenuDivider(),
-          PopupMenuItem(value: 'numbering', child: Text('Numbering')),
-          PopupMenuItem(value: 'insertDate', child: Text('Insert date')),
-          PopupMenuItem(value: 'extensionCase', child: Text('Extension case')),
+          PopupMenuButton<String>(
+            tooltip: 'Add rule',
+            icon: const Icon(Icons.add),
+            onSelected: (value) {
+              final rule = _createRule(value);
+              if (rule == null) return;
+              session.addRule(rule);
+              setState(() => _expandedId = rule.id);
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(value: 'prefix', child: Text('Prefix')),
+              PopupMenuItem(value: 'suffix', child: Text('Suffix')),
+              PopupMenuItem(value: 'findReplace', child: Text('Find & replace')),
+              PopupMenuItem(
+                value: 'removeChars',
+                child: Text('Remove characters'),
+              ),
+              PopupMenuItem(
+                value: 'insertAtPosition',
+                child: Text('Insert at position'),
+              ),
+              PopupMenuItem(value: 'clearName', child: Text('Clear name')),
+              PopupMenuItem(value: 'nameCase', child: Text('Name case')),
+              PopupMenuDivider(),
+              PopupMenuItem(value: 'numbering', child: Text('Numbering')),
+              PopupMenuItem(value: 'insertDate', child: Text('Insert date')),
+              PopupMenuItem(
+                value: 'extensionCase',
+                child: Text('Extension case'),
+              ),
+            ],
+          ),
         ],
       ),
       child: rules.isEmpty
@@ -79,6 +100,11 @@ class _RuleListPanelState extends State<RuleListPanel> {
                   expanded: _expandedId == rule.id,
                   onExpandedChanged: (open) {
                     setState(() => _expandedId = open ? rule.id : null);
+                  },
+                  onCollapse: () {
+                    // Minimize immediately on "=" press (any expanded rule).
+                    if (_expandedId == null) return;
+                    setState(() => _expandedId = null);
                   },
                 );
               },

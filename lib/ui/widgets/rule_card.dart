@@ -12,12 +12,15 @@ class RuleCard extends StatelessWidget {
     required this.rule,
     required this.expanded,
     required this.onExpandedChanged,
+    required this.onCollapse,
   });
 
   final int index;
   final RenameRule rule;
   final bool expanded;
   final ValueChanged<bool> onExpandedChanged;
+  /// Collapse only — never expands. Used by the drag handle.
+  final VoidCallback onCollapse;
 
   @override
   Widget build(BuildContext context) {
@@ -34,62 +37,83 @@ class RuleCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          InkWell(
-            onTap: () => onExpandedChanged(!expanded),
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
-              child: Row(
-                children: [
-                  ReorderableDragStartListener(
-                    index: index,
-                    child: const Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Icon(Icons.drag_handle, size: 20),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
+            child: Row(
+              children: [
+                // "=" handle: press collapses; drag reorders. Never expands.
+                // Listener (not GestureDetector) so it doesn't fight the drag arena.
+                MouseRegion(
+                  cursor: SystemMouseCursors.grab,
+                  child: Listener(
+                    behavior: HitTestBehavior.opaque,
+                    onPointerDown: (_) => onCollapse(),
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: const SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: Icon(Icons.drag_handle, size: 20),
+                      ),
                     ),
                   ),
-                  Checkbox(
-                    value: rule.enabled,
-                    onChanged: (v) =>
-                        session.setRuleEnabled(index, v ?? false),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+                Expanded(
+                  child: InkWell(
+                    onTap: () => onExpandedChanged(!expanded),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Row(
                       children: [
-                        Text(
-                          rule.typeLabel,
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: muted
-                                        ? scheme.onSurface.withValues(alpha: 0.5)
-                                        : null,
-                                  ),
+                        Checkbox(
+                          value: rule.enabled,
+                          onChanged: (v) =>
+                              session.setRuleEnabled(index, v ?? false),
                         ),
-                        Text(
-                          rule.summary,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: scheme.onSurfaceVariant,
-                                  ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                rule.typeLabel,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: muted
+                                          ? scheme.onSurface
+                                              .withValues(alpha: 0.5)
+                                          : null,
+                                    ),
+                              ),
+                              Text(
+                                rule.summary,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: scheme.onSurfaceVariant,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          expanded ? Icons.expand_less : Icons.expand_more,
+                          color: scheme.onSurfaceVariant,
                         ),
                       ],
                     ),
                   ),
-                  Icon(
-                    expanded ? Icons.expand_less : Icons.expand_more,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                  IconButton(
-                    tooltip: 'Remove rule',
-                    icon: const Icon(Icons.delete_outline, size: 18),
-                    onPressed: () => session.removeRuleAt(index),
-                  ),
-                ],
-              ),
+                ),
+                IconButton(
+                  tooltip: 'Remove rule',
+                  icon: const Icon(Icons.delete_outline, size: 18),
+                  onPressed: () => session.removeRuleAt(index),
+                ),
+              ],
             ),
           ),
           if (expanded) ...[

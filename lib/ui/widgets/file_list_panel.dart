@@ -23,20 +23,30 @@ class FileListPanel extends StatelessWidget {
       subtitle: session.isEmpty
           ? 'Drop or select files to begin'
           : '${session.fileCount} selected',
-      trailing: PopupMenuButton<String>(
-        tooltip: 'Add',
-        icon: const Icon(Icons.add),
-        onSelected: (value) {
-          switch (value) {
-            case 'files':
-              onAddFiles();
-            case 'folder':
-              onAddFolder();
-          }
-        },
-        itemBuilder: (context) => const [
-          PopupMenuItem(value: 'files', child: Text('Add files')),
-          PopupMenuItem(value: 'folder', child: Text('Add folder')),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            tooltip: 'Clear files',
+            onPressed: session.isEmpty ? null : session.clearFiles,
+            icon: const Icon(Icons.clear_all),
+          ),
+          PopupMenuButton<String>(
+            tooltip: 'Add',
+            icon: const Icon(Icons.add),
+            onSelected: (value) {
+              switch (value) {
+                case 'files':
+                  onAddFiles();
+                case 'folder':
+                  onAddFolder();
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(value: 'files', child: Text('Add files')),
+              PopupMenuItem(value: 'folder', child: Text('Add folder')),
+            ],
+          ),
         ],
       ),
       child: session.isEmpty
