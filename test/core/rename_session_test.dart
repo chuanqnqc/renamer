@@ -47,6 +47,17 @@ void main() {
     expect(session.preview, isEmpty);
   });
 
+  test('clearRules removes all rules', () {
+    final session = RenameSession()
+      ..addPaths([r'E:\x\one.txt'])
+      ..addRule(PrefixRule(id: '1', prefix: 'A_'))
+      ..addRule(SuffixRule(id: '2', suffix: '_Z'));
+    expect(session.preview.single.newName, 'A_one_Z.txt');
+    session.clearRules();
+    expect(session.rules, isEmpty);
+    expect(session.preview.single.newName, 'one.txt');
+  });
+
   test('removeAt removes a single file', () {
     final session = RenameSession()
       ..addPaths([r'E:\x\one.txt', r'E:\x\two.txt']);
